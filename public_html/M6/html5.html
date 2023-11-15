@@ -14,7 +14,22 @@ var y = 100; // Y position
 var speed = 6; // Distance to move each frame
 var sideLength = 50; // Length of each side of the square
 
-// FLags to track which keys are pressed
+// Properties for the obstacle block
+var obstacleX = canvas.width; // Starting position at the right edge
+var obstacleY = Math.round(Math.random() * canvas.height);
+var obstacleWidth = 50;
+var obstacleHeight = 50;
+var obstacleSpeed = 4;
+
+// Properties for the score multiplier power-up
+var powerUpX = Math.round(Math.random() * canvas.width);
+var powerUpY = Math.round(Math.random() * canvas.height);
+var powerUpLength = 25;
+var scoreMultiplier = 1; // Initial multiplier value
+var powerUpActive = false; // Flag to check if the power-up is active
+var powerUpDuration = 5000; // Duration of the power-up in milliseconds (5 seconds)
+
+// Flags to track which keys are pressed
 var down = false;
 var up = false;
 var right = false;
@@ -24,6 +39,38 @@ var left = false;
 var targetX = 0;
 var targetY = 0;
 var targetLength = 25;
+
+// Properties for colored squares
+var blueSquare = {
+  x: Math.round(Math.random() * canvas.width - 25),
+  y: Math.round(Math.random() * canvas.height - 25),
+  length: 25,
+  value: 2,
+  color: '#0000FF'
+};
+var pinkSquare = {
+  x: Math.round(Math.random() * canvas.width - 25),
+  y: Math.round(Math.random() * canvas.height - 25),
+  length: 25,
+  value: 5,
+  color: '#FF00FF'
+};
+var redSquare = {
+  x: Math.round(Math.random() * canvas.width - 25),
+  y: Math.round(Math.random() * canvas.height - 25),
+  length: 25,
+  value: -1,
+  color: '#FF0000'
+};
+var goldSquare = {
+  x: Math.round(Math.random() * canvas.width - 25),
+  y: Math.round(Math.random() * canvas.height - 25),
+  length: 25,
+  value: -1,
+  color: '#FFD700'
+};
+
+// This code adds the blue, pink, and gold blocks JVP9 2023-11-12
 
 // Determine if number a is within the range b to c (exclusive)
 function isWithin(a, b, c) {
@@ -38,37 +85,19 @@ var id = null;
 // Listen for keydown events
 canvas.addEventListener('keydown', function(event) {
   event.preventDefault();
-  console.log(event.key, event.keyCode);
-  if (event.keyCode === 40) { // DOWN
-    down = true;
-  }
-  if (event.keyCode === 38) { // UP
-    up = true;
-  }
-  if (event.keyCode === 37) { // LEFT
-    left = true;
-  }
-  if (event.keyCode === 39) { // RIGHT
-    right = true;
-  }
+  if (event.keyCode === 40) down = true; // DOWN
+  if (event.keyCode === 38) up = true; // UP
+  if (event.keyCode === 37) left = true; // LEFT
+  if (event.keyCode === 39) right = true; // RIGHT
 });
 
 // Listen for keyup events
 canvas.addEventListener('keyup', function(event) {
   event.preventDefault();
-  console.log(event.key, event.keyCode);
-  if (event.keyCode === 40) { // DOWN
-    down = false;
-  }
-  if (event.keyCode === 38) { // UP
-    up = false;
-  }
-  if (event.keyCode === 37) { // LEFT
-    left = false;
-  }
-  if (event.keyCode === 39) { // RIGHT
-    right = false;
-  }
+  if (event.keyCode === 40) down = false; // DOWN
+  if (event.keyCode === 38) up = false; // UP
+  if (event.keyCode === 37) left = false; // LEFT
+  if (event.keyCode === 39) right = false; // RIGHT
 });
 
 // Show the start menu
@@ -88,21 +117,19 @@ function menu() {
 
 // Start the game
 function startGame() {
-	// Reduce the countdown timer ever second
+  // Reduce the countdown timer every second
   id = setInterval(function() {
     countdown--;
   }, 1000)
   // Stop listening for click events
   canvas.removeEventListener('click', startGame);
-  // Put the target at a random starting point
-	moveTarget();
   // Kick off the draw loop
   draw();
 }
 
 // Show the game over screen
 function endGame() {
-	// Stop the countdown
+  // Stop the countdown
   clearInterval(id);
   // Display the final score
   erase();
@@ -128,55 +155,155 @@ function erase() {
 function draw() {
   erase();
   // Move the square
-  if (down) {
-    y += speed;
-  }
-  if (up) {
-    y -= speed;
-  }
-  if (right) {
-    x += speed;
-  }
-  if (left) {
-    x -= speed;
-  }
+  if (down) y += speed;
+  if (up) y -= speed;
+  if (right) x += speed;
+  if (left) x -= speed;
+
   // Keep the square within the bounds
-  if (y + sideLength > canvas.height) {
-    y = canvas.height - sideLength;
-  }
-  if (y < 0) {
-    y = 0;
-  }
-  if (x < 0) {
-    x = 0;
-  }
-  if (x + sideLength > canvas.width) {
-    x = canvas.width - sideLength;
-  }
+  if (y + sideLength > canvas.height) y = canvas.height - sideLength;
+  if (y < 0) y = 0;
+  if (x < 0) x = 0;
+  if (x + sideLength > canvas.width) x = canvas.width - sideLength;
+
   // Collide with the target
-  if (isWithin(targetX, x, x + sideLength) || isWithin(targetX + targetLength, x, x + sideLength)) { // X
-    if (isWithin(targetY, y, y + sideLength) || isWithin(targetY + targetLength, y, y + sideLength)) { // Y
+  if (isWithin(targetX, x, x + sideLength) || isWithin(targetX + targetLength, x, x + sideLength)) {
+    if (isWithin(targetY, y, y + sideLength) || isWithin(targetY + targetLength, y, y + sideLength)) {
       // Respawn the target
       moveTarget();
       // Increase the score
       score++;
     }
   }
+
+  // Collide with the blue square
+  if (isWithin(blueSquare.x, x, x + sideLength) || isWithin(blueSquare.x + blueSquare.length, x, x + sideLength)) {
+    if (isWithin(blueSquare.y, y, y + sideLength) || isWithin(blueSquare.y + blueSquare.length, y, y + sideLength)) {
+      // Respawn the blue square
+      blueSquare.x = Math.round(Math.random() * canvas.width - blueSquare.length);
+      blueSquare.y = Math.round(Math.random() * canvas.height - blueSquare.length);
+      // Increase the score
+      score += blueSquare.value;
+    }
+  }
+
+  // Collide with the goldSquare
+  if (
+    isWithin(goldSquare.x, x, x + sideLength) ||
+    isWithin(goldSquare.x + goldSquare.length, x, x + sideLength)
+  ) {
+    if (
+      isWithin(goldSquare.y, y, y + sideLength) ||
+      isWithin(goldSquare.y + goldSquare.length, y, y + sideLength)
+    ) {
+
+      score = score + Math.round(score * 0.5);
+      goldSquare.x = -goldSquare.x;
+      goldSquare.y = -goldSquare.y;
+
+      // Set a timeout to respawn the goldSquare after 5 seconds
+      setTimeout(function() {
+        // Check if the goldSquare position hasn't changed (to avoid respawning if it has been collected again)
+        goldSquare.x = Math.round(Math.random() * canvas.width - goldSquare.length);
+        goldSquare.y = Math.round(Math.random() * canvas.height - goldSquare.length);
+      }, 5000); // 5000 milliseconds (5 seconds)
+    }
+  }
+
+
+
+  // Collide with the pink square
+  if (isWithin(pinkSquare.x, x, x + sideLength) || isWithin(pinkSquare.x + pinkSquare.length, x, x + sideLength)) {
+    if (isWithin(pinkSquare.y, y, y + sideLength) || isWithin(pinkSquare.y + pinkSquare.length, y, y + sideLength)) {
+      // Respawn the pink square
+      pinkSquare.x = Math.round(Math.random() * canvas.width - pinkSquare.length);
+      pinkSquare.y = Math.round(Math.random() * canvas.height - pinkSquare.length);
+      // Increase the score
+      score += pinkSquare.value;
+    }
+  }
+
+  // Collide with the red square
+  if (isWithin(redSquare.x, x, x + sideLength) || isWithin(redSquare.x + redSquare.length, x, x + sideLength)) {
+    if (isWithin(redSquare.y, y, y + sideLength) || isWithin(redSquare.y + redSquare.length, y, y + sideLength)) {
+      // Respawn the red square
+      redSquare.x = Math.round(Math.random() * canvas.width - redSquare.length);
+      redSquare.y = Math.round(Math.random() * canvas.height - redSquare.length);
+      // Decrease the score
+      score += redSquare.value;
+    }
+  }
+
+// JVP9 2023-11-12
+
   // Draw the square
   context.fillStyle = '#FF0000';
   context.fillRect(x, y, sideLength, sideLength);
+
   // Draw the target 
   context.fillStyle = '#00FF00';
   context.fillRect(targetX, targetY, targetLength, targetLength);
+
+  // Draw the colored squares
+  context.fillStyle = blueSquare.color;
+  context.fillRect(blueSquare.x, blueSquare.y, blueSquare.length, blueSquare.length);
+  context.fillStyle = pinkSquare.color;
+  context.fillRect(pinkSquare.x, pinkSquare.y, pinkSquare.length, pinkSquare.length);
+  context.fillStyle = redSquare.color;
+  context.fillRect(redSquare.x, redSquare.y, redSquare.length, redSquare.length);
+  context.fillStyle = goldSquare.color;
+  context.fillRect(goldSquare.x, goldSquare.y, goldSquare.length, goldSquare.length);
+
+  // Draw the obstacle block
+  context.fillStyle = '#808080'; // Gray color
+  context.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+
+  // Draw the square
+  context.fillStyle = '#FF0000';
+  context.fillRect(x, y, sideLength, sideLength);
+
+
+  // Inside the draw function, move the obstacle block
+  obstacleX -= obstacleSpeed;
+  if (obstacleX + obstacleWidth < 0) {
+    obstacleX = canvas.width; // Reset position when it goes off the screen
+    obstacleY = Math.round(Math.random() * canvas.height);
+  }
+
+  // Check for collision with the obstacle
+  if (
+    isWithin(obstacleX, x, x + sideLength) &&
+    isWithin(obstacleY, y, y + sideLength)
+  ) {
+    // Collided with obstacle, reduce speed by half
+    speed = 0;
+  }
+
+  // Draw the obstacle block
+  context.fillStyle = '#808080'; // Gray color
+  context.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+
+
   // Draw the score and time remaining
   context.fillStyle = '#000000';
   context.font = '24px Arial';
   context.textAlign = 'left';
   context.fillText('Score: ' + score, 10, 24);
   context.fillText('Time Remaining: ' + countdown, 10, 50);
+
   // End the game or keep playing
   if (countdown <= 0) {
     endGame();
+  } else if (speed == 0) {
+    // Stop the countdown
+    clearInterval(id);
+    // Display the final score
+    erase();
+    context.fillStyle = '#000000';
+    context.font = '24px Arial';
+    context.textAlign = 'center';
+    context.fillText('You hit the obstacle! ' + '', canvas.width / 2, canvas.height / 2.3);
+    context.fillText('Final Score: ' + score, canvas.width / 2, canvas.height / 2);
   } else {
     window.requestAnimationFrame(draw);
   }
