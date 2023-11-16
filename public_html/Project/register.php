@@ -36,6 +36,12 @@ require_once(__DIR__ ."/../../lib/functions.php");
         echo "Email must not be empty <br>";
         $hasError = true;
     }
+    // SANITIZE
+    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Please enter a valid email <br>";
+        $hasError = true;
+    }
     if(empty($password)) {
         echo "Password must not be empty <br>";
         $hasError = true;
