@@ -37,8 +37,13 @@ require_once(__DIR__ ."/../../partials/nav.php");
         $hasError = true;
     }
     // SANITIZE
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+    $email = sanitize_email($email);
+    /*if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Please enter a valid email <br>";
+        $hasError = true;
+    }*/
+    if(!is_valid_email($email)) {
         echo "Please enter a valid email <br>";
         $hasError = true;
     }
