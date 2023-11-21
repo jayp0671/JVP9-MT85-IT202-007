@@ -1,0 +1,61 @@
+.alert-success {
+    background-color: green;
+}
+
+.alert-warning {
+    background-color: yellow;
+}
+
+.alert-danger {
+    background-color: red;
+}
+
+.alert-info {
+    background-color: teal;
+}
+
+nav li {
+    display: inline;
+    background-color: #336699; /* Dark Blue */
+}
+
+nav li a {
+    color: white;
+}
+
+input {
+    border-radius: 0; /* Rectangular shape for input fields */
+}
+
+body {
+    background-color: #87CEEB; /* Light Blue */
+    color: #00008b;
+}
+
+nav {
+    background-color: #87CEEB; /* Dark background color */
+    padding: 10px 0; /* Add some padding for better spacing */
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff; /* White text color */
+    font-weight: bold;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: #555; /* Darker background color on hover */
+}
