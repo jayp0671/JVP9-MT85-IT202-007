@@ -1,23 +1,33 @@
 .alert-success {
-    background-color: green
+    background-color: #28a745; /* Green */
 }
 
 .alert-warning {
-    background-color: yellow;
+    background-color: #ffc107; /* Yellow */
 }
 
 .alert-danger {
-    background-color: red;
+    background-color: #dc3545; /* Red */
 }
 
 .alert-info {
-    background-color: teal;
+    background-color: #17a2b8; /* A shade of blue */
 }
-nav li{display: inline; background-color: rebeccapurple;}
-nav li a{color: hotpink}
-input{border-radius: 50%;}
-body{
-    background-color: hotpink;
-    color: rgb(153, 0, 153);
 
+nav li {
+    display: inline;
+    background-color: #336699; /* Rebecca Purple */
+}
+
+nav li a {
+    color: white;
+}
+
+input {
+    border-radius: 0;
+}
+
+body {
+    background-color: #87CEEB; /* Sky Blue */
+    color: #00008b; /* Dark Purple */
 }
