@@ -6,6 +6,7 @@ if (!has_role("Admin")) {
     flash("You don't have permission to view this page", "warning");
     die(header("Location: " . get_url("home.php")));
 }
+
 //handle the toggle first so select pulls fresh data
 if (isset($_POST["role_id"])) {
     $role_id = se($_POST, "role_id", "", false);
@@ -20,17 +21,21 @@ if (isset($_POST["role_id"])) {
         }
     }
 }
+
 $query = "SELECT id, name, description, is_active from Roles";
 $params = null;
+
 if (isset($_POST["role"])) {
     $search = se($_POST, "role", "", false);
     $query .= " WHERE name LIKE :role";
     $params =  [":role" => "%$search%"];
 }
+
 $query .= " ORDER BY modified desc LIMIT 10";
 $db = getDB();
 $stmt = $db->prepare($query);
 $roles = [];
+
 try {
     $stmt->execute($params);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -44,6 +49,55 @@ try {
 }
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Roles</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        form {
+            display: inline-block;
+            margin: 0;
+        }
+
+        input[type="search"] {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        input[type="submit"], input[type="button"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
 <h1>List Roles</h1>
 <form method="POST">
     <input type="search" name="role" placeholder="Role Filter" value="<?php se($_POST, "role");?>" />
@@ -73,7 +127,7 @@ try {
                         <form method="POST">
                             <input type="hidden" name="role_id" value="<?php se($role, 'id'); ?>" />
                             <?php if (isset($search) && !empty($search)) : ?>
-                                <?php /* if this is part of a search, lets persist the search criteria so it reloads correctly*/ ?>
+                                <?php /* if this is part of a search, let's persist the search criteria so it reloads correctly*/ ?>
                                 <input type="hidden" name="role" value="<?php se($search, null); ?>" />
                             <?php endif; ?>
                             <input type="submit" value="Toggle" />
@@ -84,7 +138,10 @@ try {
         <?php endif; ?>
     </tbody>
 </table>
+
 <?php
 //note we need to go up 1 more directory
 require_once(__DIR__ . "/../../../partials/flash.php");
 ?>
+</body>
+</html>
