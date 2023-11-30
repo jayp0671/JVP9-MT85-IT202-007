@@ -16,3 +16,9 @@ function is_valid_password($password)
 {
     return strlen($password) >= 8;
 }
+
+function sanitize_city_name($city)
+{
+    // Remove leading and trailing whitespaces, but preserve spaces within the name
+    return preg_replace('/\s+/', ' ', trim($city));
+}
