@@ -34,10 +34,10 @@ require_once(__DIR__ . "/../../partials/nav.php");
             <label for="astronomy">Astronomy</label>
         </div>
 
-        <div>
+        <!-- <div>
             <input type="radio" id="sports" name="info_radio" value="sports" required>
             <label for="sports">Sports</label>
-        </div>
+        </div> -->
         
     </fieldset>
 

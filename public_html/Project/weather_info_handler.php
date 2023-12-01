@@ -57,7 +57,7 @@ switch ($radio) {
         $url = "https://weatherapi-com.p.rapidapi.com/current.json?q=" . urlencode($city);
         break;
     case 'forecastWeather':
-        $url = "https://weatherapi-com.p.rapidapi.com/forecast.json?q=" . urlencode($city) . "&days=7";
+        $url = "https://weatherapi-com.p.rapidapi.com/forecast.json?q=" . urlencode($city) . "&days=4";
         break;
     case 'timeZone':
         $url = "https://weatherapi-com.p.rapidapi.com/timezone.json?q=" . urlencode($city);
@@ -65,9 +65,9 @@ switch ($radio) {
     case 'astronomy':
         $url = "https://weatherapi-com.p.rapidapi.com/astronomy.json?q=" . urlencode($city);
         break;
-    case 'sports':
-        $url = "https://weatherapi-com.p.rapidapi.com/sports.json?q=" . urlencode($city);
-        break;
+    // case 'sports':
+    //     $url = "https://weatherapi-com.p.rapidapi.com/sports.json?q=" . urlencode($city);
+    //     break;
 }
 
 if ($url) {
