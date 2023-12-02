@@ -2,6 +2,7 @@
 session_start();
 
 require(__DIR__ . "/../../partials/nav.php");
+require_once(__DIR__ . "/../../lib/db.php"); // Assuming you have a file with database configuration
 
 // Check if 'weather_data' key exists in $_SESSION
 if (isset($_SESSION['weather_data'])) {
@@ -11,31 +12,148 @@ if (isset($_SESSION['weather_data'])) {
 
     // Check which radio button was selected
     $radio = $_SESSION['weather_data']['selected_radio'] ?? '';
-    //echo "<p>Selected Radio: $radio</p>";  // Debug statement
+
+    // Create an array to store weather data for insertion
+    $weatherDataForInsert = [];
 
     switch ($radio) {
         case 'currentWeather':
+            $weatherDataForInsert = getCurrentWeatherDataForInsert($_SESSION['weather_data']['currentWeather']['current']);
             displayCurrentWeather($_SESSION['weather_data']['currentWeather']['current']);
             break;
         case 'forecastWeather':
             displayForecastWeather($_SESSION['weather_data']['forecastWeather']['forecast']['forecastday']);
+            // Implement logic for forecast weather data insertion
             break;
         case 'timeZone':
+            $weatherDataForInsert = getTimeZoneDataForInsert($_SESSION['weather_data']['timeZone']['location']);
             displayTimeZone($_SESSION['weather_data']['timeZone']['location']);
             break;
         case 'astronomy':
+            $weatherDataForInsert = getAstronomyDataForInsert($_SESSION['weather_data']['astronomy']['astronomy']);
             displayAstronomy($_SESSION['weather_data']['astronomy']['astronomy']);
             break;
-        // case 'sports':
-        //     displaySports($_SESSION['weather_data']['sports']['football']);
-        //     break;
         default:
-            echo "<p>No matching radio button found.</p>";  // Debug statement
+            echo "<p>No matching radio button found.</p>";
     }
+
+    // Insert weather data into the database
+    if (!empty($weatherDataForInsert)) {
+        insertWeatherData($weatherDataForInsert);
+    }
+
 } else {
     flash("No weather data available. Please submit the form to get weather information.");
     header("Location: request_data_form.php");
     exit;
+}
+
+// Function to get current weather data for insertion
+function getCurrentWeatherDataForInsert($data)
+{
+    global $cityName; // Make $cityName global
+
+    return [
+        'temperature' => $data['temp_f'],
+        'feels_like' => $data['feelslike_f'],
+        'wind_speed' => $data['wind_mph'],
+        'gust_speed' => $data['gust_mph'],
+        'wind_degree' => $data['wind_degree'],
+        'wind_direction' => $data['wind_dir'],
+        'pressure' => $data['pressure_in'],
+        'humidity' => $data['humidity'],
+        'cloud' => $data['cloud'],
+        'weather_condition' => '', // Set this based on your data
+        'city_name' => $cityName,
+        // Add other fields as needed
+    ];
+}
+
+// Function to get time zone data for insertion
+function getTimeZoneDataForInsert($data)
+{
+    global $cityName; // Make $cityName global
+
+    return [
+        'city_name' => $cityName,
+        'region' => $data['region'],
+        'country' => $data['country'],
+        'latitude' => $data['lat'],
+        'longitude' => $data['lon'],
+        'time_zone_id' => $data['tz_id'],
+        'local_time' => $data['localtime'],
+        // Add other fields as needed
+    ];
+}
+
+// Function to get astronomy data for insertion
+function getAstronomyDataForInsert($data)
+{
+    global $cityName; // Make $cityName global
+
+    return [
+        'city_name' => $cityName,
+        'sunrise' => $data['sunrise'],
+        'sunset' => $data['sunset'],
+        'moonrise' => $data['moonrise'],
+        'moonset' => $data['moonset'],
+        'moon_phase' => $data['moon_phase'],
+        'moon_illumination' => $data['moon_illumination'],
+        // Add other fields as needed
+    ];
+}
+
+// Function to insert weather data into the database
+function insertWeatherData($data)
+{
+    global $db; // Assuming you have a database connection variable
+
+    // Use prepared statements to prevent SQL injection
+    $stmt = $db->prepare("INSERT INTO weather_data (temperature, feels_like, wind_speed, gust_speed, wind_degree, wind_direction, pressure, humidity, cloud, weather_condition, city_name, region, country, latitude, longitude, time_zone_id, local_time, sunrise, sunset, moonrise, moonset, moon_phase, moon_illumination) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    if ($stmt === false) {
+        echo "<p>Database error: Unable to prepare statement.</p>";
+        return;
+    }
+
+    // Bind parameters
+    $stmt->bind_param(
+        "dddddsdddsdssddssssds",
+        $data['temperature'],
+        $data['feels_like'],
+        $data['wind_speed'],
+        $data['gust_speed'],
+        $data['wind_degree'],
+        $data['wind_direction'],
+        $data['pressure'],
+        $data['humidity'],
+        $data['cloud'],
+        $data['weather_condition'],
+        $data['city_name'],
+        $data['region'],
+        $data['country'],
+        $data['latitude'],
+        $data['longitude'],
+        $data['time_zone_id'],
+        $data['local_time'],
+        $data['sunrise'],
+        $data['sunset'],
+        $data['moonrise'],
+        $data['moonset'],
+        $data['moon_phase'],
+        $data['moon_illumination']
+    );
+
+    // Execute statement
+    $stmt->execute();
+
+    // Check for errors
+    if ($stmt->errno) {
+        echo "<p>Database error: " . $stmt->error . "</p>";
+    }
+
+    // Close statement
+    $stmt->close();
 }
 
 // Function to display current weather
@@ -138,11 +256,4 @@ function displayAstronomy($data)
         echo "<p>Astronomy data not available</p>";
     }
 }
-
-
-
-
-
-// Function to display sports
-
 ?>

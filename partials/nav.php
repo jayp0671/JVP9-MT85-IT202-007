@@ -36,7 +36,8 @@ if (session_status() == PHP_SESSION_NONE) {
         <?php if (is_logged_in()) : ?>
             <li><a href="<?php echo get_url('home.php'); ?>">Home</a></li>
             <li><a href="<?php echo get_url('profile.php'); ?>">Profile</a></li>
-            <li><a href="<?php echo get_url('request_data_form.php'); ?>">Get Weather Data</a></li> <!-- Updated label for the form -->
+            <li><a href="<?php echo get_url('request_data_form.php'); ?>">Get Weather Data</a></li>
+            <li><a href="<?php echo get_url('all_cities_weather.php'); ?>">Top Cities</a></li>
             <?php if (has_role("Admin")) : ?>
                 <li><a href="<?php echo get_url('admin/create_role.php'); ?>">Create Role</a></li>
                 <li><a href="<?php echo get_url('admin/list_roles.php'); ?>">List Roles</a></li>
