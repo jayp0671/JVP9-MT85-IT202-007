@@ -91,66 +91,67 @@
 </script>
 
     <?php
-// PHP code to process the form will go here
+    // PHP code to process the form will go here
 
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    
-    // Validate form data (you can add more validation as needed)
-    $title = trim($_POST["title"]);
-    $ingredients = trim($_POST["ingredients"]);
-    $instructions = trim($_POST["instructions"]);
-    $servings = intval($_POST["servings"]);
+    // Check if the form is submitted
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        
+        // Validate form data (you can add more validation as needed)
+        $title = trim($_POST["title"]);
+        $ingredients = trim($_POST["ingredients"]);
+        $instructions = trim($_POST["instructions"]);
+        $servings = intval($_POST["servings"]);
 
-    // Validate data
-    if (empty($title) || empty($ingredients) || empty($instructions) || $servings <= 0) {
-        echo "Please fill in all fields with valid data.";
-    } else {
-        // Database connection parameters
-        $host = "db.ethereallab.app";
-        $username = "jvp9";
-        $password = "dgkRX0qbRPKs";
-        $database = "jvp9";
-
-        // Create a database connection
-        $conn = new mysqli($host, $username, $password, $database);
-
-        // Check the connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-
-        // Check for duplicate title
-        $checkDuplicate = "SELECT * FROM Recipes WHERE title = ?";
-        $stmtCheck = $conn->prepare($checkDuplicate);
-        $stmtCheck->bind_param("s", $title);
-        $stmtCheck->execute();
-        $resultCheck = $stmtCheck->get_result();
-
-        if ($resultCheck->num_rows > 0) {
-            echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe with the same title already exists!";</script>';
+        // Validate data
+        if (empty($title) || empty($ingredients) || empty($instructions) || $servings <= 0) {
+            echo "Please fill in all fields with valid data.";
         } else {
-            // Insert data into the database
-            $sql = "INSERT INTO Recipes (title, ingredients, instructions, servings) VALUES (?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssi", $title, $ingredients, $instructions, $servings);
+            // Database connection parameters
+            $host = "db.ethereallab.app";
+            $username = "jvp9";
+            $password = "dgkRX0qbRPKs";
+            $database = "jvp9";
 
-            if ($stmt->execute()) {
-                echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe created successfully!";</script>';
-            } else {
-                echo '<script>document.getElementById("completionMessage").innerHTML = "Error creating recipe: ' . $stmt->error . '";</script>';
+            // Create a database connection
+            $conn = new mysqli($host, $username, $password, $database);
+
+            // Check the connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
             }
 
-            // Close the database connection
-            $stmt->close();
-        }
+            // Check for duplicate title
+            $checkDuplicate = "SELECT * FROM Recipes WHERE title = ?";
+            $stmtCheck = $conn->prepare($checkDuplicate);
+            $stmtCheck->bind_param("s", $title);
+            $stmtCheck->execute();
+            $resultCheck = $stmtCheck->get_result();
 
-        // Close the duplicate check statement and connection
-        $stmtCheck->close();
-        $conn->close();
+            if ($resultCheck->num_rows > 0) {
+                echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe with the same title already exists!";</script>';
+            } else {
+                // Insert data into the database
+                $sql = "INSERT INTO Recipes (title, ingredients, instructions, servings, source) VALUES (?, ?, ?, ?, ?)";
+                $source = "Manual"; // Set the source to "Manual"
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("sssis", $title, $ingredients, $instructions, $servings, $source);
+
+                if ($stmt->execute()) {
+                    echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe created successfully!";</script>';
+                } else {
+                    echo '<script>document.getElementById("completionMessage").innerHTML = "Error creating recipe: ' . $stmt->error . '";</script>';
+                }
+
+                // Close the database connection
+                $stmt->close();
+            }
+
+            // Close the duplicate check statement and connection
+            $stmtCheck->close();
+            $conn->close();
+        }
     }
-}
-?>
+    ?>
 
 </body>
 </html>

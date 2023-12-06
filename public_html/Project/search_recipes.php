@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Validate data
     if (empty($recipeSearch)) {
-        echo "Please enter a recipe search query.";
+        //echo "Please enter a recipe search query.";
     } else {
         // Fetch recipe data from the API
         $apiResponse = fetchRecipeData($recipeSearch);
@@ -59,6 +59,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     echo "<p><strong>Servings:</strong> {$recipe['servings']}</p>";
                     echo "<p><strong>Instructions:</strong> {$recipe['instructions']}</p>";
+
+                    // Add form to add recipe to the database
+                    echo '<form action="search_recipes.php" method="post">';
+                    echo '<input type="hidden" name="recipeTitle" value="' . htmlspecialchars($recipe['title']) . '">';
+                    echo '<input type="hidden" name="recipeIngredients" value="' . htmlspecialchars($recipe['ingredients']) . '">';
+                    echo '<input type="hidden" name="recipeServings" value="' . intval($recipe['servings']) . '">';
+                    echo '<input type="hidden" name="recipeInstructions" value="' . htmlspecialchars($recipe['instructions']) . '">';
+                    echo '<input type="hidden" name="recipeSource" value="API">'; // Add source information
+                    echo '<button type="submit" name="addRecipeButton">Add Recipe to Database</button>';
+                    echo '</form>';
+
                     echo "<hr>";
                 }
             }
@@ -69,6 +80,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             echo "No recipes found.";
         }
+    }
+}
+
+// Handle adding recipe to the database
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["addRecipeButton"])) {
+    $recipeTitle = isset($_POST["recipeTitle"]) ? trim($_POST["recipeTitle"]) : "";
+    $recipeIngredients = isset($_POST["recipeIngredients"]) ? trim($_POST["recipeIngredients"]) : "";
+    $recipeServings = isset($_POST["recipeServings"]) ? trim($_POST["recipeServings"]) : "";
+    $recipeInstructions = isset($_POST["recipeInstructions"]) ? trim($_POST["recipeInstructions"]) : "";
+    $recipeSource = isset($_POST["recipeSource"]) ? trim($_POST["recipeSource"]) : "";
+
+    if (empty($recipeTitle) || empty($recipeIngredients) || empty($recipeServings) || empty($recipeInstructions) || empty($recipeSource)) {
+        echo "Please provide all the required data for the recipe.";
+    } else {
+        // Database connection parameters
+        $host = "db.ethereallab.app";
+        $username = "jvp9";
+        $password = "dgkRX0qbRPKs";
+        $database = "jvp9";
+
+        // Create a database connection
+        $conn = new mysqli($host, $username, $password, $database);
+
+        // Check the connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+
+        // Check for duplicate title
+        $checkDuplicate = "SELECT * FROM Recipes WHERE title = ?";
+        $stmtCheck = $conn->prepare($checkDuplicate);
+        $stmtCheck->bind_param("s", $recipeTitle);
+        $stmtCheck->execute();
+        $resultCheck = $stmtCheck->get_result();
+
+        if ($resultCheck->num_rows > 0) {
+            echo "Recipe with the same title already exists!";
+        } else {
+            // Insert data into the database
+            $sql = "INSERT INTO Recipes (title, ingredients, servings, instructions, source) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssss", $recipeTitle, $recipeIngredients, $recipeServings, $recipeInstructions, $recipeSource);
+
+            if ($stmt->execute()) {
+                echo "Recipe added to the database successfully!";
+            } else {
+                echo "Error adding recipe to the database: " . $stmt->error;
+            }
+
+            // Close the database connection
+            $stmt->close();
+        }
+
+        // Close the duplicate check statement and connection
+        $stmtCheck->close();
+        $conn->close();
     }
 }
 ?>
