@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,14 +34,15 @@
             margin-bottom: 5px;
         }
 
-        input, textarea {
+        input,
+        textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
             box-sizing: border-box;
         }
 
-        button{
+        button {
             background-color: #336699; /* Dark Blue - Match your website's navigation bar color */
             color: #fff;
             padding: 10px;
@@ -56,9 +58,12 @@
         }
     </style>
 </head>
+
 <body>
     <form action="create_recipe.php" method="post">
         <h2>Create a New Recipe</h2>
+
+        <!-- Add other form fields as needed -->
 
         <label for="title">Title:</label>
         <input type="text" name="title" required>
@@ -70,9 +75,7 @@
         <textarea name="instructions" rows="4" required></textarea>
 
         <label for="servings">Servings:</label>
-        <input type="number" name="servings" required>
-
-        <!-- Add other form fields as needed -->
+        <input type="number" name="servings" required min="1">
 
         <button type="submit">Submit</button>
         <button type="reset">Reset</button>
@@ -80,22 +83,22 @@
         <!-- <a href="home.php" class=".button">Home</a> -->
         <!-- <button type="button">Click me</button> -->
 
+        <!-- Display the completion message within the form -->
+        <div id="completionMessage" style="margin-top: 10px;"></div>
     </form>
 
-    <div id="completionMessage" style="margin-top: 10px;"></div>
-
     <script>
-    document.getElementById('homeButton').addEventListener('click', function() {
-        window.location.href = 'home.php';
-    });
-</script>
+        document.getElementById('homeButton').addEventListener('click', function () {
+            window.location.href = 'home.php';
+        });
+    </script>
 
     <?php
     // PHP code to process the form will go here
 
     // Check if the form is submitted
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        
+
         // Validate form data (you can add more validation as needed)
         $title = trim($_POST["title"]);
         $ingredients = trim($_POST["ingredients"]);
@@ -104,7 +107,7 @@
 
         // Validate data
         if (empty($title) || empty($ingredients) || empty($instructions) || $servings <= 0) {
-            echo "Please fill in all fields with valid data.";
+            echo '<script>document.getElementById("completionMessage").innerHTML = "Please fill in all fields with valid data.";</script>';
         } else {
             // Database connection parameters
             $host = "db.ethereallab.app";
@@ -154,4 +157,5 @@
     ?>
 
 </body>
+
 </html>
