@@ -59,3 +59,36 @@ nav a {
 nav a:hover {
     background-color: #555; /* Darker background color on hover */
 }
+
+    .weather-card {
+        border: 0px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .weather-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .weather-table th, .weather-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .weather-table th {
+        background-color: #f2f2f2;
+    }
+
+    .weather-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .weather-table tr:hover {
+        background-color: #ddd;
+    }
+
