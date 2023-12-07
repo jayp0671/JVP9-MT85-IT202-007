@@ -52,7 +52,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     // Add the recipe to the unique recipes list
                     $uniqueRecipes[] = $recipe;
 
+                    // Display each recipe in its own recipe card
+                    echo "<div class='recipe-card'>";
                     echo "<h3>{$recipe['title']}</h3>";
+
                     $ingredientsArray = explode('|', $recipe['ingredients']);
                     $ingredientsList = '<ul><li>' . implode('</li><li>', $ingredientsArray) . '</li></ul>';
                     echo "<p><strong>Ingredients:</strong> {$ingredientsList}</p>";
@@ -70,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     echo '<button type="submit" name="addRecipeButton">Add Recipe to Database</button>';
                     echo '</form>';
 
-                    echo "<hr>";
+                    echo "</div>";
                 }
             }
 
@@ -140,11 +143,52 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["addRecipeButton"])) {
 }
 ?>
 
-<h1>Search and Add Recipes</h1>
+<!DOCTYPE html>
+<html lang="en">
 
-<!-- Search Form -->
-<form action="search_recipes.php" method="post">
-    <label for="recipeSearch">Search for Recipes:</label>
-    <input type="text" id="recipeSearch" name="recipeSearch" required>
-    <button type="submit" name="searchButton">Search</button>
-</form>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and Add Recipes</title>
+    <style>
+        /* Add the CSS styles here */
+        .recipe-card {
+            background-color: #e0f7fa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .recipe-card h3 {
+            margin-top: 0;
+        }
+
+        .recipe-card ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .recipe-card li {
+            margin-bottom: 4px;
+        }
+
+        .recipe-card form {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Search and Add Recipes</h1>
+
+    <!-- Search Form -->
+    <form action="search_recipes.php" method="post">
+        <label for="recipeSearch">Search for Recipes:</label>
+        <input type="text" id="recipeSearch" name="recipeSearch" required>
+        <button type="submit" name="searchButton">Search</button>
+    </form>
+</body>
+
+</html>
