@@ -7,5 +7,7 @@ CREATE TABLE IF NOT EXISTS `Recipes` (
     `instructions` TEXT,
     `servings` INT,
     `source` VARCHAR(255),
-    PRIMARY KEY (`id`)
+    `user_id` INT,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE  -- Assuming Users table has 'id' as primary key
 );
