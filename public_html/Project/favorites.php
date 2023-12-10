@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . "/../../partials/nav.php");
 require(__DIR__ . "/../../partials/flash.php");
+
 $host = "db.ethereallab.app";
 $username = "jvp9";
 $password = "dgkRX0qbRPKs";
@@ -17,11 +18,23 @@ if ($conn->connect_error) {
 // Fetch recipes added by the logged-in user
 $userId = $_SESSION['user']['id'];
 
-$sql = "SELECT * FROM Recipes WHERE user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
+$sqlCount = "SELECT COUNT(*) as total FROM Recipes WHERE user_id = ?";
+$stmtCount = $conn->prepare($sqlCount);
+$stmtCount->bind_param("i", $userId);
+$stmtCount->execute();
+$resultCount = $stmtCount->get_result();
+
+// Get the total count of items associated with the user
+$totalItemCount = $resultCount->fetch_assoc()['total'];
+
+// Handle filtering and sorting
+$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10; // Default to 10 if not provided
+$sortField = isset($_GET['sort']) ? $_GET['sort'] : 'title'; // Default sorting field
+$sortOrder = isset($_GET['order']) ? $_GET['order'] : 'ASC'; // Default sorting order
+
+// Query to retrieve data from your table with filtering and sorting
+$query = "SELECT * FROM Recipes WHERE user_id = $userId ORDER BY $sortField $sortOrder LIMIT $limit";
+$result = $conn->query($query);
 
 ?>
 
@@ -67,11 +80,34 @@ $result = $stmt->get_result();
 <body>
     <h1>Favorites</h1>
 
+    <!-- Display total count of items associated with the user -->
+    <p>Total items associated with you: <?php echo $totalItemCount; ?></p>
+
+    <!-- Display the total number of items shown on the page -->
+    <p>Total items shown on this page: <?php echo $result->num_rows; ?></p>
+
+    <!-- Filter and sort form -->
+    <form method='get'>
+        <label for="limit">Limit:</label>
+        <input type='number' name='limit' min='1' max='100' value='<?php echo $limit; ?>'>
+        <label for="sort">Sort by:</label>
+        <select name='sort'>
+            <option value='title' <?php echo $sortField === 'title' ? 'selected' : ''; ?>>Title</option>
+            <option value='servings' <?php echo $sortField === 'servings' ? 'selected' : ''; ?>>Servings</option>
+        </select>
+        <label for="order">Order:</label>
+        <select name='order'>
+            <option value='ASC' <?php echo $sortOrder === 'ASC' ? 'selected' : ''; ?>>Ascending</option>
+            <option value='DESC' <?php echo $sortOrder === 'DESC' ? 'selected' : ''; ?>>Descending</option>
+        </select>
+        <button type='submit'>Apply</button>
+    </form>
+
     <?php
     // Display recipes in a table
     if ($result->num_rows > 0) {
         echo "<table>";
-        echo "<tr><th>Title</th><th>Ingredients</th><th>Servings</th><th>Instructions</th></tr>";
+        echo "<tr><th>Title</th><th>Ingredients</th><th>Servings</th><th>Instructions</th><th>Actions</th></tr>";
 
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
@@ -80,18 +116,25 @@ $result = $stmt->get_result();
             echo "<td>{$row['servings']}</td>";
             echo "<td>{$row['instructions']}</td>";
 
-            // You can add more details or actions here
+            // Add links for single view and delete actions
+            echo "<td class='action-links'>";
+            echo "<a href='view_recipe_user.php?id=" . $row["id"] . "'>View</a>";
+            echo "<a href='delete_recipe_user.php?id=" . $row["id"] . "'>Delete</a>";
+            echo "</td>";
 
             echo "</tr>";
         }
 
         echo "</table>";
+
+        // Link/button to remove all associations for the logged-in user
+        echo "<a href='remove_all_associations.php'>Remove All Associations</a>";
     } else {
-        echo "No favorites found.";
+        echo "No results available.";
     }
 
     // Close the database connection
-    $stmt->close();
+    $stmtCount->close();
     $conn->close();
     ?>
 </body>
