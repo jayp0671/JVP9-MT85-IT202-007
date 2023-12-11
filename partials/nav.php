@@ -32,6 +32,7 @@ session_start();
             <li><a href="<?php echo get_url('profile.php'); ?>">Profile</a></li>
             <li><a href="<?php echo get_url('create_recipe.php'); ?>">Create Recipe</a></li>
             <li><a href="<?php echo get_url('search_recipe_user.php'); ?>">Search Recipes</a></li>
+            <li><a href="<?php echo get_url('favorites.php'); ?>">My Favorites</a></li>
         <?php endif; ?>
 
         <?php if (!is_logged_in()) : ?>
@@ -45,10 +46,7 @@ session_start();
             <li><a href="<?php echo get_url('admin/list_roles.php'); ?>">List Roles</a></li>
             <li><a href="<?php echo get_url('admin/assign_roles.php'); ?>">Assign Roles</a></li>
             <li><a href="<?php echo get_url('all_users_association.php'); ?>">All Users Association</a></li>
-        <?php endif; ?>
-
-        <?php if (is_logged_in() && !has_role("Admin")) : ?>
-            <li><a href="<?php echo get_url('favorites.php'); ?>">My Favorites</a></li>
+            <li><a href="<?php echo get_url('not_associated.php'); ?>">No Association Data</a></li>
         <?php endif; ?>
 
         <?php if (is_logged_in()) : ?>
