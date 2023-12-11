@@ -94,6 +94,7 @@
     </script>
 
     <?php
+    session_start();
     // PHP code to process the form will go here
 
     // Check if the form is submitted
@@ -104,7 +105,7 @@
         $ingredients = trim($_POST["ingredients"]);
         $instructions = trim($_POST["instructions"]);
         $servings = intval($_POST["servings"]);
-
+    
         // Validate data
         if (empty($title) || empty($ingredients) || empty($instructions) || $servings <= 0) {
             echo '<script>document.getElementById("completionMessage").innerHTML = "Please fill in all fields with valid data.";</script>';
@@ -114,41 +115,45 @@
             $username = "jvp9";
             $password = "dgkRX0qbRPKs";
             $database = "jvp9";
-
+    
             // Create a database connection
             $conn = new mysqli($host, $username, $password, $database);
-
+    
             // Check the connection
             if ($conn->connect_error) {
                 die("Connection failed: " . $conn->connect_error);
             }
-
+    
             // Check for duplicate title
             $checkDuplicate = "SELECT * FROM Recipes WHERE title = ?";
             $stmtCheck = $conn->prepare($checkDuplicate);
             $stmtCheck->bind_param("s", $title);
             $stmtCheck->execute();
             $resultCheck = $stmtCheck->get_result();
-
+    
             if ($resultCheck->num_rows > 0) {
                 echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe with the same title already exists!";</script>';
             } else {
                 // Insert data into the database
-                $sql = "INSERT INTO Recipes (title, ingredients, instructions, servings, source) VALUES (?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO Recipes (title, ingredients, instructions, servings, source, user_id) VALUES (?, ?, ?, ?, ?, ?)";
                 $source = "Manual"; // Set the source to "Manual"
+                
+                // Assuming you have a user session
+                $user_id = isset($_SESSION["user"]["id"]) ? $_SESSION["user"]["id"] : null;
+    
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssis", $title, $ingredients, $instructions, $servings, $source);
-
+                $stmt->bind_param("sssisi", $title, $ingredients, $instructions, $servings, $source, $user_id);
+    
                 if ($stmt->execute()) {
                     echo '<script>document.getElementById("completionMessage").innerHTML = "Recipe created successfully!";</script>';
                 } else {
                     echo '<script>document.getElementById("completionMessage").innerHTML = "Error creating recipe: ' . $stmt->error . '";</script>';
                 }
-
+    
                 // Close the database connection
                 $stmt->close();
             }
-
+    
             // Close the duplicate check statement and connection
             $stmtCheck->close();
             $conn->close();
