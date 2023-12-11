@@ -97,9 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["addRecipeButton"])) {
     $recipeServings = isset($_POST["recipeServings"]) ? trim($_POST["recipeServings"]) : "";
     $recipeInstructions = isset($_POST["recipeInstructions"]) ? trim($_POST["recipeInstructions"]) : "";
     $recipeSource = isset($_POST["recipeSource"]) ? trim($_POST["recipeSource"]) : "";
-    $userId = isset($_POST["user_id"]) ? trim($_POST["user_id"]) : "";
 
-    if (empty($recipeTitle) || empty($recipeIngredients) || empty($recipeServings) || empty($recipeInstructions) || empty($recipeSource) || empty($userId)) {
+    if (empty($recipeTitle) || empty($recipeIngredients) || empty($recipeServings) || empty($recipeInstructions) || empty($recipeSource)) {
         echo "Please provide all the required data for the recipe.";
     } else {
         // Database connection parameters
@@ -116,23 +115,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["addRecipeButton"])) {
             die("Connection failed: " . $conn->connect_error);
         }
 
-        // Check for duplicate title
-        $checkDuplicate = "SELECT * FROM Recipes WHERE title = ?";
+        // Check for duplicate title for the current user
+        $checkDuplicate = "SELECT * FROM Recipes WHERE title = ? AND user_id = ?";
         $stmtCheck = $conn->prepare($checkDuplicate);
-        $stmtCheck->bind_param("s", $recipeTitle);
+        $stmtCheck->bind_param("si", $recipeTitle, $_SESSION["user"]["id"]); // Assuming you have a user session
         $stmtCheck->execute();
         $resultCheck = $stmtCheck->get_result();
 
         if ($resultCheck->num_rows > 0) {
             echo "Recipe with the same title already exists!";
         } else {
-            // Insert data into the database with user_id
+            // Insert data into the database with the user_id
             $sql = "INSERT INTO Recipes (title, ingredients, servings, instructions, source, user_id) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssi", $recipeTitle, $recipeIngredients, $recipeServings, $recipeInstructions, $recipeSource, $userId);
+            $stmt->bind_param("sssssi", $recipeTitle, $recipeIngredients, $recipeServings, $recipeInstructions, $recipeSource, $_SESSION["user"]["id"]); // Assuming you have a user session
 
             if ($stmt->execute()) {
-                echo "You have favorited this recipe!";
+                echo "Recipe added to the database successfully!";
             } else {
                 echo "Error adding recipe to the database: " . $stmt->error;
             }
