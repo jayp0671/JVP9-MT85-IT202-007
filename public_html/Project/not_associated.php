@@ -55,9 +55,15 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10; // Default to 10 i
 $sortField = isset($_GET['sort']) ? $_GET['sort'] : 'title'; // Default sorting field
 $sortOrder = isset($_GET['order']) ? $_GET['order'] : 'ASC'; // Default sorting order
 
-// Query to retrieve data from your table with filtering and sorting
-$query = "SELECT * FROM Recipes ORDER BY $sortField $sortOrder LIMIT $limit"; // Replace YourTable with your actual table name
+// Query to retrieve data not associated with any user
+$query = "SELECT * FROM Recipes WHERE user_id IS NULL ORDER BY $sortField $sortOrder LIMIT $limit";
 $result = $conn->query($query);
+
+// Query to count the number of recipes with NULL user_id
+$countQuery = "SELECT COUNT(*) AS totalItems FROM Recipes WHERE user_id IS NULL";
+$countResult = $conn->query($countQuery);
+$countRow = $countResult->fetch_assoc();
+$totalItems = $countRow['totalItems'];
 
 // Check if there are rows in the result
 if ($result->num_rows > 0) {
@@ -77,8 +83,13 @@ if ($result->num_rows > 0) {
     echo "<button type='submit'>Apply</button>";
     echo "</form>";
 
-    echo "<h2>Data List:</h2>";
-    echo "<table border='1'>";
+    // Display the total number of items
+    echo "<h1>Data List</h1>";
+    echo "<p>Total Items Not Associated with Anyone: $totalItems</p>";
+    echo "<p>Total Items Shown on the Page: " . $result->num_rows . "</p>";
+
+
+    echo "<table>";
     echo "<tr><th>Title</th><th>Ingredients</th><th>Instructions</th><th>Servings</th><th>Source</th><th>Actions</th></tr>";
 
     // Output data of each row
@@ -92,9 +103,8 @@ if ($result->num_rows > 0) {
 
         // Add links for actions
         echo "<td class='action-links'>";
-        echo "<a href='view_recipe.php?id=" . $row["id"] . "'>View</a>";
-        echo "<a href='delete_recipe.php?id=" . $row["id"] . "'>Delete</a>";
-        echo "<a href='edit_recipe.php?id=" . $row["id"] . "'>Edit</a>";
+        echo "<a href='view_recipe_na.php?id=" . $row["id"] . "'>View</a>";
+        // echo "<a href='delete_recipe_all.php?id=" . $row["id"] . "'>Delete</a>";
 
         echo "</td>";
 
